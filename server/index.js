@@ -13,26 +13,39 @@ const PORT = process.env.PORT || 3000;
 
 // Configure CORS to allow requests from Vercel frontend
 const corsOptions = {
-  origin: [
-    'https://miggymouse-to-do-list.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ],
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'https://miggymouse-to-do-list.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://127.0.0.1:5173',
+      'http://127.0.0.1:3000'
+    ];
+    
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(session({
-    secret: 'secret',
+    secret: process.env.SESSION_SECRET || 'secret-key',
     resave: false,
     saveUninitialized: true,
     cookie: { 
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      httpOnly: true
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours
     }
 }));
 
