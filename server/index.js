@@ -4,11 +4,37 @@ import { pool } from './db.js';
 import { randomUUID } from 'crypto';
 import { hashPassword, comparePassword } from './components/hash.js';
 import dotenv from 'dotenv';
+import cors from 'cors';
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+// Configure CORS to allow requests from Vercel frontend
+const corsOptions = {
+  origin: [
+    'https://miggymouse-to-do-list.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(session({
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      httpOnly: true
+    }
+}));
 
 /* app.get('/', (req, res) => {
   res.send('Aray Mo Pakak!!!!!');
@@ -53,83 +79,52 @@ app.get('/delete-item', (req, res) => {
 }) */
 
 
-const list = [
-    {
-        id: 1,
-        title: 'assignments',
-        status: 'pending'
-    },
-    {
-        id: 2,
-        title: 'daily chores',
-        status: 'pending'
-    }
 
-
-];
-
-const items = [
-    {
-        id: 1,
-        listId: 1,
-        description: 'math assignment',
-        status: 'pending'
-    }
-    , {
-        id: 2,
-        listId: 1,
-        description: 'Web Dev',
-        status: 'pending'
-    }
-    , {
-        id: 3,
-        listId: 2,
-        description: 'Wash Dish',
-        status: 'pending'
-    }
-    , {
-        id: 4,
-        listId: 2,
-        description: 'Clean Room',
-        status: 'pending'
-    }
-];
 
 app.get('/get-lists', async (req, res) => {
-    const list = await pool.query('SELECT * FROM list');
-    res.status(200).json({ success: true, lists: list.rows });
-});
-
-app.get('/get-items/:id', (req, res) => {
-    const listId = req.params.id;
-    const fillteredItems = items.filter(
-        item => item.listId == listId);
-
-    if (fillteredItems.length === 0) {
-        return res.status(404).json({ success: false, message: 'No items found for the given list ID' });
+    try {
+        const result = await pool.query('SELECT id as list_id, title, status FROM list ORDER BY id DESC');
+        res.status(200).json({ success: true, lists: result.rows });
+    } catch (error) {
+        console.error('Get lists error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch lists' });
     }
-
-    res.status(200).json({ success: true, items: fillteredItems });
-
 });
 
+app.get('/get-items/:id', async (req, res) => {
+    try {
+        const listId = req.params.id;
+        const result = await pool.query('SELECT * FROM items WHERE list_id = $1 ORDER BY id DESC', [listId]);
+        
+        if (result.rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'No items found for the given list ID' });
+        }
 
+        res.status(200).json({ success: true, items: result.rows });
+    } catch (error) {
+        console.error('Get items error:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch items' });
+    }
+});
 
-
-app.use(express.json());
-
-app.use(session({
-    secret: 'secret',
-}));
 
 app.post('/add-list', async (req, res) => {
-    const { listtitle } = req.body;
-    const id = randomUUID();
-    const listId = randomUUID();
+    try {
+        const { listtitle } = req.body;
+        
+        if (!listtitle || !listtitle.trim()) {
+            return res.status(400).json({ success: false, message: 'Task title is required' });
+        }
+        
+        const id = randomUUID();
 
-    await pool.query('INSERT INTO list (id, list_id, title , status) VALUES ($1, $2, $3, $4)', [id, listId, listtitle, 'pending']);
+        const result = await pool.query('INSERT INTO list (id, title, status) VALUES ($1, $2, $3)', [id, listtitle, 'pending']);
 
-    res.status(200).json({ success: true, message: 'List added successfully', id, listId });
+        res.status(200).json({ success: true, message: 'List added successfully', id });
+    } catch (error) {
+        console.error('Add list error:', error);
+        res.status(500).json({ success: false, message: 'Failed to add task. Please try again.' });
+    }
 });
 
 app.post('/edit-list', async (req, res) => {
@@ -150,13 +145,21 @@ app.post('/delete-list', async (req, res) => {
 
 
 app.post('/add-item', async (req, res) => {
-    const { listId: providedListId, description } = req.body;
-    const id = randomUUID();
-    const listId = providedListId || randomUUID();
+    try {
+        const { listId, description } = req.body;
+        const id = randomUUID();
 
-    await pool.query('INSERT INTO items (id, list_id, description, status) VALUES ($1, $2, $3, $4)', [id, listId, description, 'pending']);
+        if (!listId || !description || !description.trim()) {
+            return res.status(400).json({ success: false, message: 'List ID and description are required' });
+        }
 
-    res.status(200).json({ success: true, message: 'Item added successfully', id, listId });
+        await pool.query('INSERT INTO items (id, list_id, description, status) VALUES ($1, $2, $3, $4)', [id, listId, description, 'pending']);
+
+        res.status(200).json({ success: true, message: 'Item added successfully', id });
+    } catch (error) {
+        console.error('Add item error:', error);
+        res.status(500).json({ success: false, message: 'Failed to add item. Please try again.' });
+    }
 });
 
 app.post('/edit-item', async (req, res) => {
