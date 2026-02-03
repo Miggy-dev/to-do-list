@@ -11,6 +11,9 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy for Render
+app.set('trust proxy', 1);
+
 // Configure CORS to allow requests from Vercel frontend and local development
 const allowedOrigins = [
   'https://miggymouse-to-do-list.vercel.app',
@@ -20,21 +23,20 @@ const allowedOrigins = [
   'http://127.0.0.1:3000'
 ];
 
+// Logging middleware for debugging CORS
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
+  next();
+});
+
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
   optionsSuccessStatus: 200
 }));
+
 app.use(express.json());
 app.use(session({
     secret: process.env.SESSION_SECRET || 'secret-key',
