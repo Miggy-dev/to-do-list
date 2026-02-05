@@ -14,10 +14,9 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy for Render
 app.set('trust proxy', 1);
 
-app.set('trust proxy', 1);
-
 const allowedOrigins = [
   'https://miggymouse-to-do-list.vercel.app',
+  'https://to-do-list-bice-alpha.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
