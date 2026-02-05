@@ -103,9 +103,9 @@ function App() {
         <div className="mt-6 text-center">
           <p className="text-sm text-slate-600">
             Don't have an account?{' '}
-            <a href="/register" className="text-slate-900 font-medium hover:underline transition-colors">
+            <Link to="/register" className="text-slate-900 font-medium hover:underline transition-colors">
               Sign up
-            </a>
+            </Link>
           </p>
         </div>
       </div>
@@ -114,3 +114,4 @@ function App() {
 }
 
 export default App
+```
