@@ -103,9 +103,9 @@ function App() {
         <div className="mt-6 text-center">
           <p className="text-sm text-slate-600">
             Don't have an account?{' '}
-            <Link to="/register" className="text-slate-900 font-medium hover:underline transition-colors">
+            <a href="/register" className="text-slate-900 font-medium hover:underline transition-colors">
               Sign up
-            </Link>
+            </a>
           </p>
         </div>
       </div>
