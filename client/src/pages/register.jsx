@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-function Register() {
+function register() {
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -10,13 +10,10 @@ function Register() {
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e?.preventDefault()
+    e.preventDefault()
     setIsLoading(true)
-    const apiUrl = `${import.meta.env.VITE_API_URL}/register`;
-    console.log('Attempting registration at:', apiUrl);
-    
     try {
-      const response = await axios.post(apiUrl, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/register`, {
         name,
         username,
         password 
@@ -119,14 +116,14 @@ function Register() {
         <div className="mt-6 text-center">
           <p className="text-sm text-slate-600">
             Already have an account?{' '}
-            <Link to="/" className="text-slate-900 font-medium hover:underline transition-colors">
+            <a href="/" className="text-slate-900 font-medium hover:underline transition-colors">
               Sign in
-            </Link>
+            </a>
           </p>
         </div>
       </div>
     </div>
   )
-}
+} 
 
-export default Register
+export default register

@@ -14,7 +14,8 @@ const PORT = process.env.PORT || 3000;
 // Trust proxy for Render
 app.set('trust proxy', 1);
 
-// Configure CORS to allow requests from Vercel frontend and local development
+app.set('trust proxy', 1);
+
 const allowedOrigins = [
   'https://miggymouse-to-do-list.vercel.app',
   'http://localhost:5173',
@@ -23,74 +24,37 @@ const allowedOrigins = [
   'http://127.0.0.1:3000'
 ];
 
-// Logging middleware for debugging CORS
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
   next();
 });
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  optionsSuccessStatus: 200
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 }));
 
 app.use(express.json());
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'secret-key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { 
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+  secret: process.env.SESSION_SECRET || 'secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  }
 }));
-
-/* app.get('/', (req, res) => {
-  res.send('Aray Mo Pakak!!!!!');
-}); */
-
-
-
-/* app.get('/home', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/get-list', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/add-list', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/edit-list', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/delet-list', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/get-item', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/add-item', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/edit-item', (req, res) => {
-    res.send('love----joy-----hop----');
-})
-
-app.get('/delete-item', (req, res) => {
-    res.send('love----joy-----hop----');
-}) */
 
 
 
