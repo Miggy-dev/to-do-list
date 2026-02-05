@@ -124,6 +124,6 @@ function register() {
       </div>
     </div>
   )
-}
+} 
 
 export default register
