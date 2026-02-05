@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
-function register() {
+function Register() {
   const [name, setName] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -10,10 +10,13 @@ function register() {
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e?.preventDefault()
     setIsLoading(true)
+    const apiUrl = `${import.meta.env.VITE_API_URL}/register`;
+    console.log('Attempting registration at:', apiUrl);
+    
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_URL}/register`, {
+      const response = await axios.post(apiUrl, {
         name,
         username,
         password 
@@ -126,4 +129,4 @@ function register() {
   )
 }
 
-export default register
+export default Register
