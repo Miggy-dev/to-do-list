@@ -28,7 +28,7 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
   next();
 });
-
+ 
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
