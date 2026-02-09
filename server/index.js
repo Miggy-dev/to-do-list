@@ -17,6 +17,7 @@ app.set('trust proxy', 1);
 const allowedOrigins = [
   'https://miggymouse-to-do-list.vercel.app',
   'https://to-do-list-bice-alpha.vercel.app',
+  'https://to-do-list-9uip1pi1o-juanmiguelbarbosa11-9552s-projects.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
@@ -27,11 +28,12 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.url} - Origin: ${req.headers.origin}`);
   next();
 });
-
+     
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    // Allow all Vercel preview deployments
+    if (origin.endsWith('.vercel.app') || allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
