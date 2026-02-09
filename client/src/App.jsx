@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
-
 
 function App() {
   const [username, setUsername] = useState('')
@@ -31,83 +30,85 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-      
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Welcome</h1>
-          <p className="text-slate-600 text-sm">Sign in to your account</p>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex justify-center mb-8">
+          <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+            </svg>
+          </div>
         </div>
 
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-semibold text-slate-900 mb-1">Welcome back</h1>
+          <p className="text-slate-500 text-sm">Sign in to continue to TaskFlow</p>
+        </div>
 
         {/* Login Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border border-slate-1000 p-8">
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
+
           {/* Email Input */}
-          <div className="mb-6">
-            <label htmlFor="email" className="block text-sm font-medium text-slate-900 mb-2">
-              Email Address
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1.5">
+              Email
             </label>
             <input
-              type="text  "
+              type="text"
               value={username}
               onChange={(e) => {
                 setUsername(e.target.value)
                 setError('')
               }}
               placeholder="you@example.com"
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-colors text-slate-900 placeholder-slate-400"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent text-sm text-slate-900 placeholder-slate-400"
             />
           </div>
 
           {/* Password Input */}
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-medium text-slate-900 mb-2">
-              Password
-            </label>
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+                Password
+              </label>
+              <a href="#" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">
+                Forgot?
+              </a>
+            </div>
             <input
-              
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200 transition-colors text-slate-900 placeholder-slate-400"
+              className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent text-sm text-slate-900 placeholder-slate-400"
             />
           </div>
-
-          {/* Forgot Password Link */}
-          <div className="mb-8">
-            <a href="#" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
-              Forgot your password?
-            </a>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600 font-medium">{error}</p>
-            </div>
-          )}
 
           {/* Login Button */}
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-slate-900 text-white font-medium py-2.5 rounded-lg hover:bg-slate-800 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors duration-200"
+            className="w-full bg-slate-900 text-white font-medium py-2.5 rounded-lg hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors text-sm"
           >
-            {isLoading ? 'Signing in...' : 'Sign In'}
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
         {/* Sign Up Link */}
-        <div className="mt-6 text-center">
-          <p className="text-sm text-slate-600">
-            Don't have an account?{' '}
-            <a href="/register" className="text-slate-900 font-medium hover:underline transition-colors">
-              Sign up
-            </a>
-          </p>
-        </div>
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-slate-900 font-medium hover:underline">
+            Create one
+          </Link>
+        </p>
       </div>
     </div>
   )
