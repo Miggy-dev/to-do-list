@@ -87,15 +87,16 @@ app.get('/get-items/:id', async (req, res) => {
 
 app.post('/add-list', async (req, res) => {
     try {
-        const { listtitle } = req.body;
+        const { listtitle, status } = req.body;
         
         if (!listtitle || !listtitle.trim()) {
             return res.status(400).json({ success: false, message: 'Task title is required' });
         }
         
         const id = randomUUID();
+        const taskStatus = status || 'pending';
 
-        const result = await pool.query('INSERT INTO list (id, title, status) VALUES ($1, $2, $3)', [id, listtitle, 'pending']);
+        const result = await pool.query('INSERT INTO list (id, title, status) VALUES ($1, $2, $3)', [id, listtitle, taskStatus]);
 
         res.status(200).json({ success: true, message: 'List added successfully', id });
     } catch (error) {
@@ -123,14 +124,15 @@ app.post('/delete-list', async (req, res) => {
 
 app.post('/add-item', async (req, res) => {
     try {
-        const { listId, description } = req.body;
+        const { listId, description, status } = req.body;
         const id = randomUUID();
 
         if (!listId || !description || !description.trim()) {
             return res.status(400).json({ success: false, message: 'List ID and description are required' });
         }
 
-        await pool.query('INSERT INTO items (id, list_id, description, status) VALUES ($1, $2, $3, $4)', [id, listId, description, 'pending']);
+        const itemStatus = status || 'pending';
+        await pool.query('INSERT INTO items (id, list_id, description, status) VALUES ($1, $2, $3, $4)', [id, listId, description, itemStatus]);
 
         res.status(200).json({ success: true, message: 'Item added successfully', id });
     } catch (error) {
@@ -139,12 +141,29 @@ app.post('/add-item', async (req, res) => {
     }
 });
 
+
 app.post('/edit-item', async (req, res) => {
-    const { listId, description, status } = req.body;
+    const { id, description, status } = req.body;
 
-    await pool.query('UPDATE items SET description = $2, status = $3 WHERE list_id = $1', [listId, description, status]);
+    try {
+        await pool.query('UPDATE items SET description = $2, status = $3 WHERE id = $1', [id, description, status]);
+        res.status(200).json({ success: true, message: 'Item updated successfully' });
+    } catch (error) {
+        console.error('Edit item error:', error);
+        res.status(500).json({ success: false, message: 'Failed to update item' });
+    }
+});
 
-    res.status(200).json({ success: true, message: 'Item updated successfully' });
+app.post('/delete-item', async (req, res) => {
+    const { id } = req.body;
+
+    try {
+        await pool.query('DELETE FROM items WHERE id = $1', [id]);
+        res.status(200).json({ success: true, message: 'Item deleted successfully' });
+    } catch (error) {
+        console.error('Delete item error:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete item' });
+    }
 });
 
 app.post('/delete-items', async (req, res) => {
@@ -152,7 +171,7 @@ app.post('/delete-items', async (req, res) => {
 
     await pool.query('DELETE FROM items WHERE list_id = $1', [listId]);
 
-    res.status(200).json({ success: true, message: 'Item deleted successfully' });
+    res.status(200).json({ success: true, message: 'Items deleted successfully' });
 });
 
 app.post('/register', async (req, res) => {
